@@ -1,7 +1,7 @@
 /// <reference path="../types/ruhend-scraper.d.ts" />
 import { ttdl } from 'ruhend-scraper';
 import { MyContext } from './types';
-import { Message } from 'grammy/types';
+import type { Message } from 'grammy/types';
 
 const isAudio = async (url: string) => {
   const response = await fetch(url);

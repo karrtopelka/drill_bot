@@ -5,7 +5,6 @@ import cors from 'cors';
 
 import * as middlewares from './middlewares';
 import MessageResponse from './interfaces/MessageResponse';
-import { bot } from './bot';
 
 require('dotenv').config();
 
@@ -20,7 +19,7 @@ app.use(
 );
 app.use(express.json());
 
-app.get<{}, MessageResponse>('/', (req, res) => {
+app.get<{}, MessageResponse>('/', (req: express.Request, res: express.Response) => {
   res.json({
     message: 'DRILL BOT SERVER API🌏✨🌈🦄',
   });
@@ -30,6 +29,5 @@ app.get<{}, MessageResponse>('/', (req, res) => {
 app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);
 
-bot.start();
 
 export default app;
