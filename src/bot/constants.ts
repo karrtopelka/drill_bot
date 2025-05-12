@@ -3,12 +3,12 @@ export const EMOJIS = {
   FART: '🙊',
   PISS: '🐳',
   SWEAR: '🤬',
-} as const
+} as const;
 
 export const ACTION_TYPES = {
   SHIT: 'shit',
   FART: 'fart',
   PISS: 'piss',
-} as const
+} as const;
 
-export const MIN_REPUTATION = 3
+export const MIN_REPUTATION = 3;

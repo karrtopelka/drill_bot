@@ -5,7 +5,7 @@ export function formatActionMessage(
     count: { total: number; today: number }
   },
 ): string {
-  const timeStr = new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' })
+  const timeStr = new Date().toLocaleTimeString('uk-UA', { hour: '2-digit', minute: '2-digit' });
   // const firstMessage = {
   //   shit: [
   //     `💩 *${username}* довів, що гравітація працює бездоганно!`,
@@ -82,7 +82,7 @@ export function formatActionMessage(
     shit: `🌟 О ${timeStr}, *${username}* покакав ${action.count.today}-й раз за останні 24 години! (Загалом: ${action.count.total})`,
     fart: `🌪 О ${timeStr}, *${username}* пукнув ${action.count.today}-й раз за останні 24 години! (Загалом: ${action.count.total})`,
     piss: `🌊 О ${timeStr}, *${username}* попісяв ${action.count.today}-й раз за останні 24 години! (Загалом: ${action.count.total})`,
-  }
+  };
 
   // const randomMessage =
   //   firstMessage[action.type][Math.floor(Math.random() * firstMessage[action.type].length)]
@@ -93,5 +93,5 @@ export function formatActionMessage(
     secondMessage[action.type]
     // '\n' +
     // `_Загальний рахунок: ${action.count.total}_`
-  )
+  );
 }

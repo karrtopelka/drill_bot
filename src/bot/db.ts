@@ -1,7 +1,7 @@
-import Database from 'better-sqlite3'
-import { and, eq, gte, sql } from 'drizzle-orm'
-import { drizzle } from 'drizzle-orm/better-sqlite3'
-import { join } from 'path'
+import Database from 'better-sqlite3';
+import { and, eq, gte, sql } from 'drizzle-orm';
+import { drizzle } from 'drizzle-orm/better-sqlite3';
+import { join } from 'path';
 import {
   actionsTable,
   chatsTable,
@@ -9,26 +9,26 @@ import {
   usersTable,
   alertStatusTable,
   swearWordsTable,
-} from './db/schema.js'
-const sqlite = new Database(join(process.cwd(), 'stats.db'))
-const db = drizzle({ client: sqlite })
+} from './db/schema.js';
+const sqlite = new Database(join(process.cwd(), 'stats.db'));
+const db = drizzle({ client: sqlite });
 
 export const getOrCreateUser = async (id: number, username: string | null) => {
-  await db.insert(usersTable).values({ id, username }).onConflictDoNothing().run()
-  return db.select().from(usersTable).where(eq(usersTable.id, id)).get()
-}
+  await db.insert(usersTable).values({ id, username }).onConflictDoNothing().run();
+  return db.select().from(usersTable).where(eq(usersTable.id, id)).get();
+};
 
 export const addAction = async (
   userId: number,
   chatId: number,
   actionType: 'shit' | 'fart' | 'piss',
 ) => {
-  await db.insert(actionsTable).values({ userId, chatId, actionType }).onConflictDoNothing().run()
-}
+  await db.insert(actionsTable).values({ userId, chatId, actionType }).onConflictDoNothing().run();
+};
 
 export const getUserStats = async (userId: number, chatId: number) => {
-  const now = Date.now()
-  const oneDayAgo = now - 24 * 60 * 60 * 1000
+  const now = Date.now();
+  const oneDayAgo = now - 24 * 60 * 60 * 1000;
 
   const total = await db
     .select({
@@ -38,7 +38,7 @@ export const getUserStats = async (userId: number, chatId: number) => {
     .from(actionsTable)
     .where(and(eq(actionsTable.userId, userId), eq(actionsTable.chatId, chatId)))
     .groupBy(actionsTable.actionType)
-    .all()
+    .all();
 
   const todayStats = await db
     .select({
@@ -54,10 +54,10 @@ export const getUserStats = async (userId: number, chatId: number) => {
       ),
     )
     .groupBy(actionsTable.actionType)
-    .all()
+    .all();
 
-  return { total, todayStats }
-}
+  return { total, todayStats };
+};
 
 export const getAllStats = async (chatId: number) => {
   return db
@@ -82,8 +82,8 @@ export const getAllStats = async (chatId: number) => {
     .where(eq(actionsTable.chatId, chatId))
     .innerJoin(usersTable, eq(actionsTable.userId, usersTable.id))
     .groupBy(actionsTable.userId, usersTable.username)
-    .all()
-}
+    .all();
+};
 
 export const getAllUsersReputation = async (chatId: number) => {
   return db
@@ -97,17 +97,17 @@ export const getAllUsersReputation = async (chatId: number) => {
     .innerJoin(usersTable, eq(actionsTable.userId, usersTable.id))
     .innerJoin(chatMembersTable, eq(actionsTable.userId, chatMembersTable.userId))
     .groupBy(actionsTable.userId, usersTable.username)
-    .all()
-}
+    .all();
+};
 
 export const getOrCreateChat = async (id: number, name: string) => {
-  await db.insert(chatsTable).values({ id, name }).onConflictDoNothing().run()
-  return db.select().from(chatsTable).where(eq(chatsTable.id, id)).get()
-}
+  await db.insert(chatsTable).values({ id, name }).onConflictDoNothing().run();
+  return db.select().from(chatsTable).where(eq(chatsTable.id, id)).get();
+};
 
 export const addChatMember = async (userId: number, chatId: number) => {
-  await db.insert(chatMembersTable).values({ userId, chatId }).onConflictDoNothing().run()
-}
+  await db.insert(chatMembersTable).values({ userId, chatId }).onConflictDoNothing().run();
+};
 
 export const getChatMembers = async (chatId: number) => {
   return db
@@ -123,8 +123,8 @@ export const getChatMembers = async (chatId: number) => {
     .from(chatMembersTable)
     .innerJoin(usersTable, eq(chatMembersTable.userId, usersTable.id))
     .where(eq(chatMembersTable.chatId, chatId))
-    .all()
-}
+    .all();
+};
 
 export const getChatMember = async (userId: number, chatId: number) => {
   return db
@@ -140,18 +140,18 @@ export const getChatMember = async (userId: number, chatId: number) => {
     .from(chatMembersTable)
     .where(and(eq(chatMembersTable.userId, userId), eq(chatMembersTable.chatId, chatId)))
     .leftJoin(usersTable, eq(chatMembersTable.userId, usersTable.id))
-    .get()
-}
+    .get();
+};
 
 type ChatMember = {
   id: number
   username: string
-}
+};
 
 type Chat = {
   id: number
   members: ChatMember[]
-}
+};
 
 export const getAllChatsWithMembers = async (): Promise<Chat[]> => {
   const results = await db
@@ -163,29 +163,29 @@ export const getAllChatsWithMembers = async (): Promise<Chat[]> => {
     .from(chatsTable)
     .innerJoin(chatMembersTable, eq(chatsTable.id, chatMembersTable.chatId))
     .innerJoin(usersTable, eq(chatMembersTable.userId, usersTable.id))
-    .all()
+    .all();
 
   // Group members by chat
-  const chatsMap = new Map()
+  const chatsMap = new Map();
 
   results.forEach((row) => {
-    const { chatId, userId, username } = row
+    const { chatId, userId, username } = row;
 
     if (!chatsMap.has(chatId)) {
       chatsMap.set(chatId, {
         id: chatId,
         members: [],
-      })
+      });
     }
 
     chatsMap.get(chatId).members.push({
       id: userId,
       username,
-    })
-  })
+    });
+  });
 
-  return Array.from(chatsMap.values())
-}
+  return Array.from(chatsMap.values());
+};
 
 export const getChatsByUserId = async (userId: number) => {
   return db
@@ -197,36 +197,36 @@ export const getChatsByUserId = async (userId: number) => {
     .from(chatsTable)
     .innerJoin(chatMembersTable, eq(chatsTable.id, chatMembersTable.chatId))
     .where(eq(chatMembersTable.userId, userId))
-    .all()
-}
+    .all();
+};
 
 export const getAllChats = async () => {
-  return db.select().from(chatsTable).all()
-}
+  return db.select().from(chatsTable).all();
+};
 
 export const getAlertStatus = async (region: string) => {
-  return db.select().from(alertStatusTable).where(eq(alertStatusTable.region, region)).get()
-}
+  return db.select().from(alertStatusTable).where(eq(alertStatusTable.region, region)).get();
+};
 
 export const upsertAlertStatus = async (region: string, status: boolean) => {
-  const timestamp = new Date()
+  const timestamp = new Date();
 
   const result = await db
     .update(alertStatusTable)
     .set({ status, lastChanged: timestamp })
     .where(eq(alertStatusTable.region, region))
-    .run()
+    .run();
 
   if (result.changes === 0) {
-    await db.insert(alertStatusTable).values({ region, status, lastChanged: timestamp }).run()
+    await db.insert(alertStatusTable).values({ region, status, lastChanged: timestamp }).run();
   }
-}
+};
 
 export const increaseReputation = async (userId: number, chatId: number) => {
   await db
     .update(chatMembersTable)
     .set({ reputation: sql`${chatMembersTable.reputation} + 1` })
-    .where(and(eq(chatMembersTable.userId, userId), eq(chatMembersTable.chatId, chatId)))
+    .where(and(eq(chatMembersTable.userId, userId), eq(chatMembersTable.chatId, chatId)));
 
   return db
     .select({
@@ -234,8 +234,8 @@ export const increaseReputation = async (userId: number, chatId: number) => {
     })
     .from(chatMembersTable)
     .where(and(eq(chatMembersTable.userId, userId), eq(chatMembersTable.chatId, chatId)))
-    .get()
-}
+    .get();
+};
 
 export const decreaseReputation = async (userId: number, chatId: number, amount = 1) => {
   await db
@@ -247,7 +247,7 @@ export const decreaseReputation = async (userId: number, chatId: number, amount 
                         ELSE 0
                       END`,
     })
-    .where(and(eq(chatMembersTable.userId, userId), eq(chatMembersTable.chatId, chatId)))
+    .where(and(eq(chatMembersTable.userId, userId), eq(chatMembersTable.chatId, chatId)));
 
   return db
     .select({
@@ -255,36 +255,36 @@ export const decreaseReputation = async (userId: number, chatId: number, amount 
     })
     .from(chatMembersTable)
     .where(and(eq(chatMembersTable.userId, userId), eq(chatMembersTable.chatId, chatId)))
-    .get()
-}
+    .get();
+};
 
 export const resetReputation = async (userId: number, chatId: number) => {
   await db
     .update(chatMembersTable)
     .set({ reputation: 0 })
-    .where(and(eq(chatMembersTable.userId, userId), eq(chatMembersTable.chatId, chatId)))
-}
+    .where(and(eq(chatMembersTable.userId, userId), eq(chatMembersTable.chatId, chatId)));
+};
 
 export const getReputation = async (userId: number, chatId: number) => {
   return db
     .select({ reputation: chatMembersTable.reputation })
     .from(chatMembersTable)
     .where(and(eq(chatMembersTable.userId, userId), eq(chatMembersTable.chatId, chatId)))
-    .get()
-}
+    .get();
+};
 
 export const resetSwearingCount = async (userId: number, chatId: number) => {
   await db
     .update(chatMembersTable)
     .set({ swearingCount: 0 })
-    .where(and(eq(chatMembersTable.userId, userId), eq(chatMembersTable.chatId, chatId)))
-}
+    .where(and(eq(chatMembersTable.userId, userId), eq(chatMembersTable.chatId, chatId)));
+};
 
 export const increaseSwearingCount = async (userId: number, chatId: number) => {
   await db
     .update(chatMembersTable)
     .set({ swearingCount: sql`${chatMembersTable.swearingCount} + 1` })
-    .where(and(eq(chatMembersTable.userId, userId), eq(chatMembersTable.chatId, chatId)))
+    .where(and(eq(chatMembersTable.userId, userId), eq(chatMembersTable.chatId, chatId)));
 
   return db
     .select({
@@ -292,16 +292,16 @@ export const increaseSwearingCount = async (userId: number, chatId: number) => {
     })
     .from(chatMembersTable)
     .where(and(eq(chatMembersTable.userId, userId), eq(chatMembersTable.chatId, chatId)))
-    .get()
-}
+    .get();
+};
 
 export const getSwearingCount = async (userId: number, chatId: number) => {
   return db
     .select()
     .from(chatMembersTable)
     .where(and(eq(chatMembersTable.userId, userId), eq(chatMembersTable.chatId, chatId)))
-    .get()
-}
+    .get();
+};
 
 export const addSwearWord = async (word: string): Promise<boolean> => {
   try {
@@ -310,29 +310,29 @@ export const addSwearWord = async (word: string): Promise<boolean> => {
       .select()
       .from(swearWordsTable)
       .where(eq(swearWordsTable.word, word))
-      .get()
+      .get();
 
     if (existingWord?.word) {
       // Word already exists
-      return false
+      return false;
     }
 
     // Insert the new word (with .run() to execute the query)
-    await db.insert(swearWordsTable).values({ word }).run()
+    await db.insert(swearWordsTable).values({ word }).run();
 
     // Successfully added
-    return true
+    return true;
   } catch (error) {
     // Log the error with context
-    console.error('Error adding swear word:', { word, error })
-    return false
+    console.error('Error adding swear word:', { word, error });
+    return false;
   }
-}
+};
 
 export const removeSwearWord = async (word: string) => {
-  await db.delete(swearWordsTable).where(eq(swearWordsTable.word, word))
-}
+  await db.delete(swearWordsTable).where(eq(swearWordsTable.word, word));
+};
 
 export const getSwearWords = async () => {
-  return db.select().from(swearWordsTable).all()
-}
+  return db.select().from(swearWordsTable).all();
+};
