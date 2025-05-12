@@ -5,6 +5,8 @@ import cors from 'cors';
 
 import * as middlewares from './middlewares';
 import MessageResponse from './interfaces/MessageResponse';
+import { bot } from './bot';
+
 require('dotenv').config();
 
 const app = express();
@@ -27,5 +29,7 @@ app.get<{}, MessageResponse>('/', (req, res) => {
 
 app.use(middlewares.notFound);
 app.use(middlewares.errorHandler);
+
+bot.start();
 
 export default app;
